@@ -3,9 +3,11 @@ from cube import Cube
 from model import ResNet
 from utils.cube_util import get_scrambled_cubes
 from utils.avi_util import get_models
+from tensorflow import keras
+import tensorflow as tf
 import os 
-import torch 
 import pickle 
+
 
 #make path for target and output network
 def main():
@@ -26,6 +28,7 @@ def main():
 
 if __name__ == "__main__":
     #main()
+    """
     cube = Cube()
     cube.scramble(20)
     cube1 = Cube()
@@ -34,3 +37,4 @@ if __name__ == "__main__":
     model.forward(input)
     #lst = [input, cube1.get_nn_input()]
     #model.forward(*lst)
+    """

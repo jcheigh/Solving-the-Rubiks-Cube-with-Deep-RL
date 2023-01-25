@@ -1,7 +1,7 @@
 import numpy as np
 import random 
 from utils.general_util import get_basic_cube, sgn
-import torch
+import tensorflow as tf
 class Cube:
     """
     Rubik's Cube class that holds the Cube as a 4-tuple (explained below). 
@@ -118,7 +118,8 @@ class Cube:
             column = pos * orient - 1
             result[row, int(column)] = 1
 
-        return torch.from_numpy(result)
+        return tf.convert_to_tensor(result, dtype = tf.float32)
+
 
     def is_valid(self):
         """
@@ -132,6 +133,9 @@ class Cube:
         """
         corner_perm, edge_perm, _, _ = self.state 
         return sgn(corner_perm) == sgn(edge_perm)
+
+    def get_reward(self):
+        return 1 if self.is_solved() else -1
 
     def get_successors(self):
         """
