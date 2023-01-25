@@ -1,0 +1,312 @@
+
+\newcommand{\student}{Justin Cheigh}			 
+\newcommand{\email}{jhc5@williams.edu}
+
+\title{Solving the Rubik's Cube \\ with Deep Reinforcement Learning}
+\author{\student}			
+\date{\today}										
+
+%----------------------------------------------------
+
+\documentclass[12pt,oneside,oldfontcommands]{memoir}
+
+%----------------------------------------------------
+
+\setlrmarginsandblock{2.5cm}{2.5cm}{*}  
+\setulmarginsandblock{2.5cm}{2.5cm}{*} 		
+\checkandfixthelayout						
+							
+
+%----------------------------------------------------
+\usepackage{amsmath,amsthm,amsfonts,amssymb,amscd, fancyhdr, color, comment, graphicx, environ}
+\usepackage{mathrsfs}
+\usepackage[dvipsnames]{xcolor}
+\usepackage[framemethod=TikZ]{mdframed}
+\usepackage{enumerate}
+\usepackage[shortlabels]{enumitem}
+\usepackage{fancyhdr}
+\usepackage{indentfirst}
+\usepackage{listings}
+\usepackage{thmtools}
+\usepackage{shadethm}
+\usepackage{setspace}
+\usepackage{tcolorbox}							
+\usepackage{graphicx}									% importing pdf files 
+\usepackage{minted}
+% for inserting code 
+\usepackage[backend=biber]{biblatex}
+\addbibresource{references.bib}
+\usepackage{hyperref}
+
+%----------------------------------------------------
+\graphicspath{{figures/}}								% put your figures in a folder called figures
+
+%----------------------------------------------------
+
+\newcommand{\placefigure}[1]{\centerline{\includegraphics[width=2 in]{#1}}} 
+\newcommand{\placefigureandscale}[2]{\centerline{\includegraphics[width=#2 in]{#1}}} 
+
+%----------------------------------------------------
+\newcommand{\N}{\mathbb{N}}
+\newcommand{\Z}{\mathbb{Z}}
+\newcommand{\F}{\mathbb{F}}
+\newcommand{\R}{\mathbb{R}} 
+\newcommand{\C}{\mathbb{C}}
+\newcommand{\Q}{\mathbb{Q}}
+
+\newcommand{\E}{\mathbb{E}}
+\newcommand{\Prob}{\mathbb{P}}
+\newcommand{\Var}{\text{var}}
+\newcommand{\Cov}{\text{Cov}}
+
+\newcommand{\floor}[1]{\lfloor #1 \rfloor}
+\newcommand{\ceil}[1]{\lceil #1 \rceil}
+
+\newcommand{\sm}{\setminus}
+
+\newtheorem{prop}{Proposition}
+\newtheorem{thm}{Theorem}
+\newtheorem{lem}{Lemma}
+\newtheorem{conj}{Conjecture}
+\theoremstyle{definition}
+\newtheorem{defn}{Definition}
+\newtheorem{exmp}{Example}
+\newtheorem{remark}{Remark}
+\newtheorem*{clm}{Claim}
+\newtheorem*{sk}{Sketch}
+\DeclareMathOperator{\Mod}{mod} 
+
+\newcommand{\bijectarrow}{%
+  \hookrightarrow\mathrel{\mspace{-15mu}}\rightarrow
+}
+\newcommand{\surjectarrow}{%
+  \rightarrow\mathrel{\mspace{-15mu}}\rightarrow
+}
+\newcommand{\abs}[1]{\left|#1\right|}
+
+\renewcommand{\a}{\alpha}
+\renewcommand{\b}{\beta}
+\newcommand{\g}{\gamma}
+\renewcommand{\d}{\delta}
+\newcommand{\e}{\epsilon}
+\newcommand{\s}{\sigma}
+
+\newcommand{\Ac}{\mathcal A}
+\newcommand{\Bc}{\mathcal B}
+\newcommand{\Cc}{\mathcal C}
+\newcommand{\Fc}{\mathcal F}
+\newcommand{\Hc}{\mathcal H}
+\newcommand{\Gc}{\mathcal G}
+\newcommand{\Lc}{\mathcal L}
+\newcommand{\Pc}{\mathcal P}
+\newcommand{\Uc}{\mathcal U}
+
+\DeclareMathOperator*{\argmax}{arg\,max}
+\DeclareMathOperator*{\argmin}{arg\,min}
+
+%----------------------------------------------------------------------------
+\newtcolorbox{Section}[1][]{
+colback=red!5!white,colframe=red!75!black,title= \textbf{Section #1},before upper={\parindent15pt},before lower={\parindent15pt}}
+
+\newtcolorbox{Subsection}[1][]{
+colback=blue!5!white,colframe=blue!75!black,title= \textbf{Subsection #1},before upper={\parindent15pt},before lower={\parindent15pt}}
+
+
+%----------------------------------------------------------------------------
+
+\makeatletter
+\def\maketitle{%
+  \null
+  \thispagestyle{empty}
+  \begin{center}\leavevmode
+       \normalfont
+       \includegraphics[width=0.35\columnwidth]{williamslogo.jpg}
+       \vskip 1.0cm
+	\rule{\linewidth}{0.2 mm} \\[0.4 cm]
+	{ \huge \bfseries \@title}\\
+	\rule{\linewidth}{0.2 mm} \\[1.5 cm]
+	
+	\begin{minipage}{0.5\textwidth}
+		\begin{flushleft} \large
+			\emph{Name:} \student\\
+                \href{https://github.com/jcheigh}{\emph{GitHub}}
+			\end{flushleft}
+			\end{minipage}~
+			\begin{minipage}{0.4\textwidth}
+			\begin{flushleft} \large
+			\emph{Email:} \email\\        
+                \href{https://www.linkedin.com/in/justin-cheigh/}{\emph{LinkedIn}}
+		\end{flushleft}
+	\end{minipage}\\[2 cm]
+   \end{center}
+   \vspace{1cm}
+    \begin{abstract}
+    In this writeup I describe my process for solving the Rubik's Cube using deep reinforcement learning. My code (TensorFlow/Keras) can be found \href{https://github.com/jcheigh/AI-Projects}{\emph{here.}} This project was inspired by \cite{main}. 
+
+   To solve the Rubik's Cube we begin with an approximate value iteration (AVI) algorithm that involves training a ResNet model to output a value given some configuration of the Cube. We then solve the Cube with Monte Carlo Tree Search (MCTS), where we use the trained network to reduce both the breadth and the depth of the tree search. I also describe a group theoretic way to solve the Rubik's Cube, known as the Kociemba solver. 
+   
+   This writeup aims to describe my process is a fully self-contained fashion. I introduce reinforcement learning, deep learning (ANNs, CNNs, ResNets), deep RL (DQN), MCTS, and how one can combine AVI algorithms and MCTS to create a highly optimized Rubik's Cube solver. Finally I introduce group theory and describe a group-theoretic approach to solving the Cube. 
+    \end{abstract}
+   \vfill
+   \null
+   \small
+   \cleardoublepage
+  }
+\makeatother
+
+%----------------------------------------------------
+
+\begin{document}
+%\large 
+\maketitle
+\frontmatter
+\let\cleardoublepage\clearpage
+\mainmatter
+\sloppy
+
+%----------------------------------------------------------------------------
+
+\newpage
+
+
+
+\begin{Section}[0- Introduction]
+In this paper, I demonstrate how to solve the Rubik's Cube using deep reinforcement learning. My code (Python/PyTorch) can be found \href{https://github.com/jcheigh/AI-Projects}{\emph{here.}} I give credit to \cite{main}. This is a cool project that I really enjoyed doing, so I decided to create this writeup to detail/explain my work. 
+
+\tcblower
+
+A majority of this work follows the ideas in \cite{main}. However, I will introduce the major concepts in an effort to be more self contained than most research papers. Ideally it will be possible to follow this project without any prerequisite knowledge of things like reinforcement learning or deep learning, but occasionally this may be difficult as to not make this writeup too long. 
+
+After describing the high level idea behind \cite{main}, I will transition to a completely different approach to solving the Rubik's Cube: group theory. Specifically I will discuss the Kociemba \cite{kociemba} method of solving the Cube. 
+
+\begin{center}
+\textbf{Thanks for reading! }
+\end{center}
+\end{Section}
+
+\begin{Subsection}[0.1- High Level Approach]
+This subsection describes a high level approach to solving the Rubik's Cube with deep reinforcement learning (DRL). 
+
+\tcblower
+
+Reinforcement learning (RL) is all about teaching \textit{agents} to navigate through some \textit{environment}. Ideally we aim to teach the agent which \textit{action} to take at each \textit{state} of the environment. \textit{Q-learning}, a common RL algorithm, works by assessing the ``quality'' of each state-action pair. However, Q-learning is completely infeasible for larger environments. It turns out there are more than $43$ quintillion configurations of the Rubik's Cube, which is completely unreasonable for something as simple as Q-learning. So, we need some way to approximate this Q-function, which is where we need \textit{deep reinforcement learning}. However, before getting to deep RL, we need to discuss \textit{deep learning}. 
+
+Deep learning involves using \textit{artificial neural networks} (ANNs). At the simplest level, ANNs involve stacking layers of \textit{artificial neurons}. Each neuron obtains its output typically by applying some non-linearity (ReLU for example) to a linear combination of its input. Finding these \textit{weights} and \textit{biases} involves \textit{training} the neural network, in a process like \textit{backpropagation}. Important theoretical work, like the \textit{universal approximation theorem}, tells us that this is actually a worthwhile thing to do. Great! Now we can talk about deep RL.
+
+Deep RL combines deep learning and reinforcement learning. We know that neural networks can potentially approximate functions well, so it's natural to consider using neural networks to approximate the Q-function. \textit{Deep Q-Learning} works by training a neural network (called a \textit{deep Q network} or DQN) to output the Q-value of each state-action pair $(s,a)$ given the state $s$. While Deep Q-learning has achieved superhuman performance on things like Atari games \cite{atari, DDQN}, we actually need more than just this to solve the Rubik's Cube.
+
+Some engines, such as AlphaGO \cite{AlphaGo}, were able to achieve incredible results by combining some kind of tree search with some kind of \textit{value network} like a DQN. A common tree search is \textit{Monte Carlo Tree Search} (MCTS). MCTS searches the \textit{game tree} by keeping track of the ``best'' moves and running random simulations that favor these better moves more. One can prove that MCTS converges to \textit{MiniMax} given certain circumstances. Furthermore, MCTS doesn't require a heuristic function and is able to reduce the state space, both of which often make it favorable to similar algorithms like \textit{A* search with alpha-beta pruning}. However, MCTS is still very slow at times, which is why we need to combine the concepts of Deep RL to MCTS.
+
+To solve the Rubik's Cube, we first train a value network that approximates the value of any given state. This process is fast but not as accurate. We then use MCTS, a slower process, to actually solve the Cube. However, we use the value network to reduce both the breadth and the depth of the tree search, effectively using the fast process to help speed up the more accurate slower process. All together, we create an efficient Cube solver without ever inputting any domain knowledge of the Cube!
+\end{Subsection}
+
+\begin{Section}[2- Reinforcement Learning]
+In this section I'll go over the major topics of reinforcement learning. 
+
+\tcblower 
+I'll start by describing the high level idea behind reinforcement learning through the example of chess. After an intuitive approach to the subject, I will transition to typical concepts of RL, including Markov Decision Processes, the Bellman Equation, and Q-Learning. 
+\end{Section}
+
+\begin{Subsection}[2.1- Chess as an RL Task]
+This subsection contains the high level ideas of reinforcement learning. To cling to intuition, I will describe RL through the specific example of learning to play chess. However, most of the italicized terminology is universal and will be used in later sections. 
+\tcblower
+Reinforcement learning deals with \textit{agents} navigating some \textit{environment}. In the case of chess, the agent is the learner or the computer, and the environment is, well, chess. One part of the environment are \textit{states}. For chess, one state could be some random position with black to play. Notice that part of the state is specifying which player's turn it is. The agent starts in some \textit{initial state} (the starting position of the chessboard with white to play). 
+
+
+At each state, there are known \textit{actions} that the agent can take to go from state from state. For example, one action at the initial state of chess is moving the pawn on E2 to E4. Each state comes with some immediate \textit{reward}. While certain environments like video games may have rewards at many states, games like chess may only have nonzero rewards at \textit{terminal/final states} (states where the game is over). 
+
+
+We define a \textit{policy} as a function that tells the agent what to do at every (non-terminal) state. The goal is have the agent learn the ``best'' policy in order to maximize the cumulative reward. In other words, we aim to find some \textit{optimal policy}.
+
+
+It turns out we can use various iterative algorithms to help agents learn some optimal policy. However, these methods often rely on more information than we are typically given: if an agent is navigating a truly new environment, chances are they don't know many things about the environment, including even what will happen if they take action $a$ at state $s$!
+
+
+We usually are only given a few things: the current state, the reward of the current state, and the actions we can perform. Under these tighter constraints, there's not much else to do except try things! RL really turns into the art of learning better and better policies \textit{through experience}.
+
+Great! Now that we've covered the high level approach of reinforcement learning, we will dive into formalizing this intuition. This formalization will prove useful in allowing us to achieve much more than we otherwise could. We'll start by covering Markov Decision Processes, which attempt to define \textit{environment}. 
+\end{Subsection}
+
+\begin{Subsection}[1.2- Markov Decision Process]
+In this subsection we will work to providing a definition of a Markov Decision Process (MDP), which will formalize the notion of a general environment.
+
+\tcblower 
+
+
+\begin{comment}
+A Markov decision process is a 4-tuple {\displaystyle (S,A,P_{a},R_{a})}{\displaystyle (S,A,P_{a},R_{a})}, where:
+
+{\displaystyle S}S is a set of states called the state space,
+{\displaystyle A}A is a set of actions called the action space (alternatively, {\displaystyle A_{s}}A_s is the set of actions available from state {\displaystyle s}s),
+{\displaystyle P_{a}(s,s')=\Pr(s_{t+1}=s'\mid s_{t}=s,a_{t}=a)}{\displaystyle P_{a}(s,s')=\Pr(s_{t+1}=s'\mid s_{t}=s,a_{t}=a)} is the probability that action {\displaystyle a}a in state {\displaystyle s}s at time {\displaystyle t}t will lead to state {\displaystyle s'}s' at time {\displaystyle t+1}t+1,
+{\displaystyle R_{a}(s,s')}{\displaystyle R_{a}(s,s')} is the immediate reward (or expected immediate reward) received after transitioning from state {\displaystyle s}s to state {\displaystyle s'}s', due to action {\displaystyle a}a
+The state and action spaces may be finite or infinite, for example the set of real numbers. Some processes with countably infinite state and action spaces can be reduced to ones with finite state and action spaces.[3]
+
+A policy function {\displaystyle \pi }\pi  is a (potentially probabilistic) mapping from state space ({\displaystyle S}S) to action space ({\displaystyle A}A).
+\end{comment}
+
+
+
+\tcblower
+To begin, we will define a state machine, which captures the notion of states and actions:
+\begin{defn}[State Machine]
+A \textit{state machine} is a 5-tuple $M = (S, \Sigma, \Delta, s_0, F)$, where $S$ is a set of \textit{states}, $\Sigma$ is a set of \textit{actions}, $\Delta \subseteq S \times \Sigma \times S$ is a set of \textit{permitted actions}, $s_0 \in S$ is the \textit{initial state}, and $F \subseteq S$ is a set of \textit{final/terminal states}. 
+\end{defn}
+
+\begin{remark}
+To clarify, some $\d \in \Delta$ with $\d = (s_i, \s, s_j)$ tells us that an agent taking action $\s$ at state $s_i$ \textit{potentially} takes that agent to $s_j$. 
+\end{remark}
+
+While many problems can be formulated as a state machine, this definition still is missing a few things. To truly define an environment, one requires a notion of \textit{reward}; how can an agent navigate the environment \textit{well} without some (quantifiable) way of measuring success in an environment? Furthermore, one needs to think of navigating an environment from a probabilistic perspective. Any $(s_i, \s, s_j) \in \Delta$ tells us that it is possible to get from state $s_i$ to state $s_j$ by taking action $\s$. However, one really needs to say: ``if an agent takes action $\s$ at state $s_i$, then the agent will get to state $s_j$ with probability $p$''. 
+
+With these things in mind we can create a full definition of a MDP:
+\begin{defn}[Markov Decision Process]
+A \textit{Markov Decision Process} (MDP) is a triple $(M, R, w)$, where $M = (S, \Sigma, \Delta, s_0, F)$ is a state machine, $R: S \to \R$ is a reward function, and $w: \Delta \to \R_{>0}$ assigns a position weight such that, for every $s \in S, \s \in \Sigma$,
+$$
+\sum_{\substack{\d \in \Delta \\ \d = (q,\s,q')}} w(\d) = 1.
+$$
+\end{defn}
+
+\begin{remark}
+Let $(s_i, \s, s_j) \in \Delta$. Then $w((s_i,\s,s_j)) = p$ tells us that the probability of getting to state $s_j$ by taking action $\s$ at state $s_i$ is $p$. The final constraint is simply asserting that, for each state action pair, $w$ represents a true probability distribution. We may also use the notation $\mathbb{P}[s_j \ |\ (s_i, \s)] = p$ as well. 
+\end{remark}
+\end{Subsection}
+
+\begin{Subsection}[1.3- Bellman Equation]
+This subsection serves to understand what a ``successful'' agent is actually trying to\\
+accomplish. 
+\tcblower
+Recall a policy maps states to actions. Specifically, a \textit{policy} is a map $\pi : (S \setminus F) \to \Sigma$. We wish to define some notion of an \textit{optimal policy} $\pi^*$. However, often there are many policies with infinite value (infinite cumulative reward). One way to avoid this problem is to define some \textit{discounting factor}, which essentially means the present value of a reward in the future is discounted. Specifically, let $\gamma \in (0,1]$ be our \textit{discounting factor}. Then, for some $s \in S$, we can define the discounted reward $R_t(s) = \gamma^t \cdot R(s)$.
+
+So, how good is a given policy $\pi$ at a state $s \in S$? We can work on defining the utility of policy $\pi$ at state $s$, but what we really care about is determining the best action to take at every non-terminal state. With this, we get the Bellman Equation:
+\begin{equation}\label{bell}
+U(s) := R(s) + \gamma \max_\s \sum_{s' \in S} \mathbb{P}[s' \ |\ (s,\s)] \cdot U(s').
+\end{equation}
+
+In words, the utility at state $s$ is the immediate reward plus the discounted future reward obtained by taking the best action $\s$. The discounted future reward is essentially an expected utility gain. Notice calculating $U(s)$ using the Bellman Equation involves determining the ``best'' $\s$, meaning we can use this information to determine the optimal policy $\pi^*$. 
+
+It turns out that there are iterative guessing methods like \textit{Value Iteration} that, both in the limit and in practice, use the Bellman Equation to find $\pi^*$. 
+
+However, if we step back we'll see that this might not be entirely useful. We may not always have access to the full MDP. Often we will only know a few things, like our current state, the reward of the current state, and the actions we can perform. Another reason methods like value iteration tend to be infeasible is that the computation required for these methods is simply not useful for any somewhat large state space. 
+
+So, if we assume we know only the bare minimum, determining this optimal policy seems absurd; we don't even know all of the states! It turns out we can still try different things that ultimately work well in practice, and this will be the focus of our next subsection. 
+\end{Subsection}
+
+\begin{Subsection}[1.3- TD/Q Learning]
+\end{Subsection}
+
+
+
+\begin{Section}[Group Theory]
+We'll now cover \textit{group theory}, a subset of \textit{abstract algebra}.
+
+\tcblower 
+
+Most pure math majors take abstract algebra as a core course, introducing them to a more rigorous study of algebraic structure 
+\end{Section}
+
+
+% Bibliography
+\printbibliography
+
+\end{document}

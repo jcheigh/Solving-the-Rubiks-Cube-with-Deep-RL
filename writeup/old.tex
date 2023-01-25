@@ -1,0 +1,288 @@
+
+\newcommand{\student}{Justin Cheigh}			 
+\newcommand{\email}{jhc5@williams.edu}
+\newcommand{\collaborators}{}{}
+\newcommand{\prof}{}
+\newcommand{\course}{}
+\newcommand{\coursenum}{}
+\newcommand{\psetnum}{}
+\newcommand{\ifcollab}{}
+
+\title{Solving the Rubik's Cube \\ with Deep Reinforcement Learning}
+\author{\student}			
+\date{\today}										
+
+%----------------------------------------------------
+
+\documentclass[12pt,oneside,oldfontcommands]{memoir}
+
+%----------------------------------------------------
+
+\setlrmarginsandblock{2.5cm}{2.5cm}{*}  		% left/right margins
+\setulmarginsandblock{2.5cm}{2.5cm}{*} 			% top/bottom margins
+\checkandfixthelayout							% checks the layout is correct
+\setlength{\parindent}{0in}  					% no indent on start of paragraph
+							
+
+%----------------------------------------------------
+\usepackage{amsmath,amsthm,amsfonts,amssymb,amscd, fancyhdr, color, comment, graphicx, environ}
+\usepackage{mathrsfs}
+\usepackage[dvipsnames]{xcolor}
+\usepackage[framemethod=TikZ]{mdframed}
+\usepackage{enumerate}
+\usepackage[shortlabels]{enumitem}
+\usepackage{fancyhdr}
+\usepackage{indentfirst}
+\usepackage{listings}
+\usepackage{thmtools}
+\usepackage{shadethm}
+\usepackage{setspace}
+\usepackage{tcolorbox}
+\usepackage[english]{babel}								% hyphenation rules for english
+\usepackage{graphicx}									% importing pdf files 
+\usepackage{minted}
+% for inserting code 
+\usepackage{hyperref}
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue,
+    filecolor=magenta,      
+    urlcolor= blue,
+    pdfpagemode=FullScreen,
+    }
+
+%----------------------------------------------------
+\graphicspath{{figures/}}								% put your figures in a folder called figures
+
+%----------------------------------------------------
+
+\newcommand{\placefigure}[1]{\centerline{\includegraphics[width=2 in]{#1}}} 
+\newcommand{\placefigureandscale}[2]{\centerline{\includegraphics[width=#2 in]{#1}}} 
+
+%----------------------------------------------------
+\newcommand{\N}{\mathbb{N}}
+\newcommand{\Z}{\mathbb{Z}}
+\newcommand{\F}{\mathbb{F}}
+\newcommand{\R}{\mathbb{R}} 
+\newcommand{\C}{\mathbb{C}}
+\newcommand{\Q}{\mathbb{Q}}
+
+\newcommand{\E}{\mathbb{E}}
+\newcommand{\Prob}{\mathbb{P}}
+\newcommand{\Var}{\text{var}}
+\newcommand{\Cov}{\text{Cov}}
+
+\newcommand{\floor}[1]{\lfloor #1 \rfloor}
+\newcommand{\ceil}[1]{\lceil #1 \rceil}
+
+\newcommand{\sm}{\setminus}
+
+\newtheorem{prop}{Proposition}
+\newtheorem{thm}{Theorem}
+\newtheorem{lem}{Lemma}
+\newtheorem{conj}{Conjecture}
+\theoremstyle{definition}
+\newtheorem{defn}{Definition}
+\newtheorem{exmp}{Example}
+\newtheorem{remark}{Remark}
+\newtheorem*{clm}{Claim}
+\newtheorem*{sk}{Sketch}
+\DeclareMathOperator{\Mod}{mod} 
+
+\newcommand{\bijectarrow}{%
+  \hookrightarrow\mathrel{\mspace{-15mu}}\rightarrow
+}
+\newcommand{\surjectarrow}{%
+  \rightarrow\mathrel{\mspace{-15mu}}\rightarrow
+}
+\newcommand{\abs}[1]{\left|#1\right|}
+
+\renewcommand{\a}{\alpha}
+\renewcommand{\b}{\beta}
+\newcommand{\g}{\gamma}
+\renewcommand{\d}{\delta}
+\newcommand{\e}{\epsilon}
+\newcommand{\s}{\sigma}
+
+\newcommand{\Ac}{\mathcal A}
+\newcommand{\Bc}{\mathcal B}
+\newcommand{\Cc}{\mathcal C}
+\newcommand{\Fc}{\mathcal F}
+\newcommand{\Hc}{\mathcal H}
+\newcommand{\Gc}{\mathcal G}
+\newcommand{\Lc}{\mathcal L}
+\newcommand{\Pc}{\mathcal P}
+\newcommand{\Uc}{\mathcal U}
+
+\DeclareMathOperator*{\argmax}{arg\,max}
+\DeclareMathOperator*{\argmin}{arg\,min}
+
+%----------------------------------------------------------------------------
+\newtcolorbox{Section}[1][]{
+colback=red!5!white,colframe=red!75!black,title= \textbf{Section #1}}
+
+\newtcolorbox{Subsection}[1][]{
+colback=blue!5!white,colframe=blue!75!black,title= \textbf{Subsection #1}}
+%----------------------------------------------------------------------------
+
+\makeatletter
+\def\maketitle{%
+  \null
+  \thispagestyle{empty}
+  \begin{center}\leavevmode
+       \normalfont
+       \includegraphics[width=0.35\columnwidth]{williamslogo.jpg}
+       \vskip 1.0cm
+	\rule{\linewidth}{0.2 mm} \\[0.4 cm]
+	{ \huge \bfseries \@title}\\
+	\rule{\linewidth}{0.2 mm} \\[1.5 cm]
+	
+	\begin{minipage}{0.5\textwidth}
+		\begin{flushleft} \large
+			\emph{Name:} \student\\
+                \href{https://github.com/jcheigh}{\emph{GitHub}}
+			\end{flushleft}
+			\end{minipage}~
+			\begin{minipage}{0.4\textwidth}
+			\begin{flushleft} \large
+			\emph{Email:} \email\\        
+                \href{https://www.linkedin.com/in/justin-cheigh/}{\emph{LinkedIn}}
+		\end{flushleft}
+	\end{minipage}\\[2 cm]
+   \end{center}
+   \vfill
+   \null
+   \small
+   \emph{\ifcollab} \collaborators
+   \cleardoublepage
+  }
+\makeatother
+
+%----------------------------------------------------
+
+\begin{document}
+%\large 
+\maketitle
+\frontmatter
+\let\cleardoublepage\clearpage
+\mainmatter
+\sloppy
+
+%----------------------------------------------------------------------------
+
+\newpage
+\begin{Section}[0- Introduction]
+These red boxes are new sections.
+\tcblower
+Blue boxes are subsections. 
+\end{Section}
+
+\begin{Section}[1- Reinforcement Learning]
+We'll now begin discussing the main ideas behind reinforcement learning.
+\tcblower
+After a high level approach to the subject, we will discuss Markov Decision Processes, the Bellman Equation, Temporal Difference Learning, and traditional Q-Learning. After this introduction to RL we will discuss how we can apply this general framework to the task of solving the Rubik's Cube. \end{Section}
+
+\begin{Subsection}[1.1- Intuition Behind RL]
+This subsection contains the high level ideas of reinforcement learning. To cling to intuition, we will describe RL through the specific example of learning to play checkers. However, we will still maintain common terminology that we will use later. 
+\tcblower
+Reinforcement learning deals with \textit{agents} navigating some \textit{environment}. Suppose we are teaching a computer to play checkers. The agent is the learner or the computer, and the environment is, well, checkers. The goal is to have the agent learn the best \textit{policy} (or set of instructions to follow) to maximize the cumulative reward (for checkers the rewards are either winning, drawing, or losing). 
+
+The agent starts in some \textit{initial state} (the starting arrangement of the board), and there are also \textit{final/terminal states} (boards where the game is over). At each state, there are known \textit{actions} that the agent can take (move this piece or capture this piece). So, we can re-define a policy as a function that tells the agent what action to take at every (non-terminal) state. There are also \textit{rewards} at every stage. Using these rewards we morally should be able to quantify how ``good'' some policy is, which will allow us to reformulate our goal as finding some \textit{optimal policy}. 
+
+It turns out we can use various iterative algorithms to help agents learn some optimal policy. However, these methods often rely on more information than we are typically given: if an agent is navigating a truly new environment, chances are they don't know many things about the environment, including even what will happen if they take action $\s$ at state $s$!
+
+In other words, we usually are only given a few things: the current state, the reward of the current state, and the actions we can perform. Under these tighter constraints, there's not much else to do except try things! RL really turns into the art of learning better and better policies through experience.
+
+Great! Now that we've covered the high level approach of reinforcement learning, we will dive into formalizing this intuition. This formalization will prove useful in allowing us to achieve much more than we otherwise could. We'll start by covering Markov Decision Processes, which attempt to define \textit{environment}. 
+\end{Subsection}
+
+\begin{Subsection}[1.2- Markov Decision Process]
+In this subsection we will work to providing a definition of a Markov Decision Process (MDP), which will formalize the notion of a general environment.
+\tcblower
+To begin, we will define a state machine, which captures the notion of states and actions:
+\begin{defn}[State Machine]
+A \textit{state machine} is a 5-tuple $M = (S, \Sigma, \Delta, s_0, F)$, where $S$ is a set of \textit{states}, $\Sigma$ is a set of \textit{actions}, $\Delta \subseteq S \times \Sigma \times S$ is a set of \textit{permitted actions}, $s_0 \in S$ is the \textit{initial state}, and $F \subseteq S$ is a set of \textit{final/terminal states}. 
+\end{defn}
+
+\begin{remark}
+To clarify, some $\d \in \Delta$ with $\d = (s_i, \s, s_j)$ tells us that an agent taking action $\s$ at state $s_i$ \textit{potentially} takes that agent to $s_j$. 
+\end{remark}
+
+While many problems can be formulated as a state machine, this definition still is missing a few things. To truly define an environment, one requires a notion of \textit{reward}; how can an agent navigate the environment \textit{well} without some (quantifiable) way of measuring success in an environment? Furthermore, one needs to think of navigating an environment from a probabilistic perspective. Any $(s_i, \s, s_j) \in \Delta$ tells us that it is possible to get from state $s_i$ to state $s_j$ by taking action $\s$. However, one really needs to say: ``if an agent takes action $\s$ at state $s_i$, then the agent will get to state $s_j$ with probability $p$''. 
+
+With these things in mind we can create a full definition of a MDP:
+\begin{defn}[Markov Decision Process]
+A \textit{Markov Decision Process} (MDP) is a triple $(M, R, w)$, where $M = (S, \Sigma, \Delta, s_0, F)$ is a state machine, $R: S \to \R$ is a reward function, and $w: \Delta \to \R_{>0}$ assigns a position weight such that, for every $s \in S, \s \in \Sigma$,
+$$
+\sum_{\substack{\d \in \Delta \\ \d = (q,\s,q')}} w(\d) = 1.
+$$
+\end{defn}
+
+\begin{remark}
+Let $(s_i, \s, s_j) \in \Delta$. Then $w((s_i,\s,s_j)) = p$ tells us that the probability of getting to state $s_j$ by taking action $\s$ at state $s_i$ is $p$. The final constraint is simply asserting that, for each state action pair, $w$ represents a true probability distribution. We may also use the notation $\mathbb{P}[s_j \ |\ (s_i, \s)] = p$ as well. 
+\end{remark}
+\end{Subsection}
+
+\begin{Subsection}[1.3- Bellman Equation]
+This subsection serves to understand what a ``successful'' agent is actually trying to\\
+accomplish. 
+\tcblower
+Recall a policy maps states to actions. Specifically, a \textit{policy} is a map $\pi : (S \setminus F) \to \Sigma$. We wish to define some notion of an \textit{optimal policy} $\pi^*$. However, often there are many policies with infinite value (infinite cumulative reward). One way to avoid this problem is to define some \textit{discounting factor}, which essentially means the present value of a reward in the future is discounted. Specifically, let $\gamma \in (0,1]$ be our \textit{discounting factor}. Then, for some $s \in S$, we can define the discounted reward $R_t(s) = \gamma^t \cdot R(s)$.
+
+So, how good is a given policy $\pi$ at a state $s \in S$? We can work on defining the utility of policy $\pi$ at state $s$, but what we really care about is determining the best action to take at every non-terminal state. With this, we get the Bellman Equation:
+\begin{equation}\label{bell}
+U(s) := R(s) + \gamma \max_\s \sum_{s' \in S} \mathbb{P}[s' \ |\ (s,\s)] \cdot U(s').
+\end{equation}
+
+In words, the utility at state $s$ is the immediate reward plus the discounted future reward obtained by taking the best action $\s$. The discounted future reward is essentially an expected utility gain. Notice calculating $U(s)$ using the Bellman Equation involves determining the ``best'' $\s$, meaning we can use this information to determine the optimal policy $\pi^*$. 
+
+It turns out that there are iterative guessing methods like \textit{Value Iteration} that, both in the limit and in practice, use the Bellman Equation to find $\pi^*$. 
+
+However, if we step back we'll see that this might not be entirely useful. We may not always have access to the full MDP. Often we will only know a few things, like our current state, the reward of the current state, and the actions we can perform. Another reason methods like value iteration tend to be infeasible is that the computation required for these methods is simply not useful for any somewhat large state space. 
+
+So, if we assume we know only the bare minimum, determining this optimal policy seems absurd; we don't even know all of the states! It turns out we can still try different things that ultimately work well in practice, and this will be the focus of our next subsection. 
+\end{Subsection}
+
+\begin{Subsection}[1.3- TD/Q Learning]
+\end{Subsection}
+
+\begin{Section}[2- Rubik's Cube as a RL Task]
+Now that we described the general process of reinforcement learning, our goal is to apply this perspective to the task of solving the Rubik's Cube.
+\tcblower
+In the following subsections we will give some basic background on the Rubik's Cube before discussing various representations of the Cube we will consider. The first is a naive representation that doesn't take into account the 3d nature of the Rubik's Cube. The second is more complicated but doesn't lose information that the first representation does. Finally, the third representation is purely group theoretic. FILL IN LATER. 
+\end{Section}
+\begin{Subsection}[2.1- Rubik's Cube Background]
+In this subsection we provide background and terminology related to the Rubik's Cube. 
+\tcblower
+
+Throughout this paper we assume standard coloring of the Rubik's Cube. The Cube has 6 \textit{faces}, each of which have 9 \textit{stickers} that are one of 6 possible colors. Our naive representation will consider each of these $54$ stickers individually. However, this forgets that certain stickers are connected; the Cube is actually composed of sub-cubes that we call \textit{cubies}. 
+
+
+There are three types of cubies: \textit{corners, edges, and centers}. INSERT FIGURE. In any Rubik's Cube, there are 8 \textit{corners}, each of which have 3 stickers. Furthermore, there are 12 \textit{edges}, each of which have 2 stickers, and there are 6 \textit{centers}, each with one sticker. Each cubie is uniquely defined by their color(s). For example, there is only $1$ White-Blue cubie (since only two colors were given this cubie must be an edge). 
+
+
+Center pieces are fixed relative to the other center pieces (i.e. the White center will always be directly opposite of the Yellow center), so we can refer to a face of the Cube by the color of its center (the White face). 
+
+
+For the sake of simplicity, we assume we always look at the Cube with the White face on top and the Red face in front.
+
+\begin{remark}
+This is without loss of generality for a computer, but it's not for humans! Many actual ``speedcubers'' use ``finger-tricks'' that mean holding the Cube in a certain way is beneficial. Furthermore, humans, unlike computers, can't keep track of every cubie at all times, and thus how one holds the Cube dictates visual aid, which influences how quickly one can actually solve the Cube. 
+\end{remark}
+
+
+There are $6$ faces, each of which can be turned CW or CCW, meaning there are $12$ \textit{basic moves}. Using Singmaster notation, we define the set of basic CS moves as $$\{R, L, U, D, F, B\},$$ which stands for Right, Left, Up, Down, Front, and Back (as expected, $R$ corresponds to moving the Right face clockwise once). Counterclockwise turns are represented with a lowercase letter instead, so the set of moves is $$M = \{R,r,L,l,U,u,D,d,F,f,B,b\}.$$
+
+
+A \textit{configuration} is a state of the Cube. The \textit{solved state} or \textit{solved Cube} is when all 6 faces are one solid color. So, the RL task can be defined as taking some configuration and applying a sequence of moves $m \in M$ to obtain the solved state. 
+
+We'll now begin to formalize different representations of the Cube, each of which will allow us to approach the task of solving the Cube using reinforcement learning. 
+\end{Subsection}
+
+\begin{Subsection}[2.2- FILL IN LATER]
+
+\tcblower
+
+
+\end{Subsection}
+\end{document}
