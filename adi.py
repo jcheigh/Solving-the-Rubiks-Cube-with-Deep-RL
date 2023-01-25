@@ -1,8 +1,7 @@
 from argparse import ArgumentParser 
-from cube import Cube
-from model import ResNet
+from cube import Cube 
 from utils.cube_util import get_scrambled_cubes
-from utils.avi_util import get_models
+from utils.adi_util import get_model
 from tensorflow import keras
 import tensorflow as tf
 import os 
@@ -11,12 +10,24 @@ import pickle
 
 #make path for target and output network
 def main():
-    current_model, target_model = get_models()
+    model = get_model()
     for itr in range(10000):
         cubes = get_scrambled_cubes(1000, 30) #called X in paper
         for cube in cubes:
-            #train
-            nn_input = cube.get_nn_input()
+            
+            for successor in cube.get_successors():
+                nn_input = successor.get_nn_input()
+                val, policy = model.predict(nn_input)
+                #values.append(val + successor.get_reward())
+                #policy.append()
+
+
+
+            #for action in actions
+                #value = value of best action + bellman
+                #action = action of best action + bellman
+            #train using (value, action)
+            #update parameters 
 
 
 
