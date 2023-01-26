@@ -144,12 +144,11 @@ class Cube:
         List[Cube] 
         List containing Cubes obtained by performing each of the 12 basic moves
         """
-        result = dict()
+        successors = []
         for face, dir in self.moves:
-            move = (face, dir)
             successor = self.move(face, dir, in_place = False)
-            result[move] = successor
-        return result 
+            successors.append(((face, dir), successor))
+        return successors 
     
     def get_state(self):
         """
