@@ -2,7 +2,7 @@
 
 **By Justin Cheigh** <br>
 
-In this project I attempt to solve the Rubik's Cube using [Deep Reinforcement Learning (Deep RL)](https://en.wikipedia.org/wiki/Deep_reinforcement_learning). This solver is an Tensorflow & Keras implementation of [DeepCube](https://openreview.net/pdf?id=Hyfn2jCcKm), a paper by McAleer et al. The code is inspired by [azaharyan's](https://github.com/azaharyan) DeepCode [repository](https://github.com/azaharyan/DeepCube).
+In this project I attempt to solve the Rubik's Cube using [Deep Reinforcement Learning (Deep RL)](https://en.wikipedia.org/wiki/Deep_reinforcement_learning). This solver is a Tensorflow & Keras implementation of [DeepCube](https://openreview.net/pdf?id=Hyfn2jCcKm), a paper by McAleer et al. The code is inspired by [azaharyan's](https://github.com/azaharyan) DeepCode [repository](https://github.com/azaharyan/DeepCube).
 
 I also created a fully contained writeup that includes introductions to Reinforcement Learning, Artificial Neural Networks, Deep Reinforcement Learning, Monte Carlo Tree Search, Autodidactic Iteration, Group Theory, and certain key group theoretic results concerning the Rubik's Cube (i.e. the Fundamental Theorem of Cubology, Rubik's Cube as a semi-direct product, etc.). 
 
