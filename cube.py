@@ -1,6 +1,6 @@
 import numpy as np
 import random 
-from utils.general_util import get_basic_cube, sgn
+from utils.cube_util import get_basic_cube, sgn
 import tensorflow as tf
 class Cube:
     """
@@ -144,7 +144,12 @@ class Cube:
         List[Cube] 
         List containing Cubes obtained by performing each of the 12 basic moves
         """
-        return [self.move(face, dir, in_place = False) for (face, dir) in self.moves]
+        result = dict()
+        for face, dir in self.moves:
+            move = (face, dir)
+            successor = self.move(face, dir, in_place = False)
+            result[move] = successor
+        return result 
     
     def get_state(self):
         """
