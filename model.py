@@ -3,7 +3,7 @@ from tensorflow import keras
 from keras import layers
 
 def make_model():
-    input = keras.Input(shape= (20,24))
+    input = keras.Input(shape= (480,))
 
     dense1 = layers.Dense(4096, activation ="elu")(input)
     dense2 = layers.Dense(2048, activation='elu')(dense1)
@@ -19,7 +19,7 @@ def make_model():
     return model
 
 def compile_model(model):
-    lr_schedule = keras.optimizers.schedule.ExponentialDecay(
+    lr_schedule = keras.optimizers.schedules.ExponentialDecay(
         initial_learning_rate = 0.001,
         decay_steps = 1000,
         decay_rate = 0.5

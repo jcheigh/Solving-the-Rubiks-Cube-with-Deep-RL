@@ -118,8 +118,10 @@ class Cube:
             column = pos * orient - 1
             result[row, int(column)] = 1
 
-        return tf.convert_to_tensor(result, dtype = tf.float32)
+        #flatten/expand dims
+        result = np.expand_dims(result.flatten(), 0)
 
+        return tf.convert_to_tensor(result, dtype = tf.float32)
 
     def is_valid(self):
         """

@@ -28,15 +28,20 @@ def get_nn_output(cube, model):
     for move, successor in successors:
         nn_input = successor.get_nn_input()
         succ_val, succ_policy = model.predict(nn_input)
+        print(f"Successor Value: {succ_val}\n")
+        print(f"Successor Policy: {succ_policy}\n")
         val = succ_val + successor.get_reward()
         if val > value:
             value, policy = val, move
     return value, policy
 
 def get_training_data(cubes):
-    return cubes 
+    X = np.empty((30, 480))
+    for i, cube in enumerate(cubes):
+        X[i] = np.array(cube.get_nn_input())
+    return X 
 
 def get_sample_weights():
-    return np.array([1/(i+1) for i in range(30)] for j in range(1000)).flatten()
+    return np.array([1/(i+1) for i in range(30)])#np.array([1/(i+1) for i in range(30)] for j in range(1000)).flatten()
 
 
