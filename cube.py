@@ -146,6 +146,7 @@ class Cube:
         List[Cube] 
         List containing Cubes obtained by performing each of the 12 basic moves
         """
+        return [self.move(face, dir, in_place = False) for face, dir in self.moves]
         successors = []
         for face, dir in self.moves:
             successor = self.move(face, dir, in_place = False)

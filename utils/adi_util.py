@@ -25,11 +25,9 @@ def get_scrambled_cubes(batch_size, k):
 def get_nn_output(cube, model):
     successors = cube.get_successors()
     value, policy = -np.inf, ''
-    for move, successor in successors:
+    for move, successor in enumerate(successors):
         nn_input = successor.get_nn_input()
-        succ_val, succ_policy = model.predict(nn_input)
-        print(f"Successor Value: {succ_val}\n")
-        print(f"Successor Policy: {succ_policy}\n")
+        succ_val, succ_policy = model.predict(nn_input, verbose = 0)
         val = succ_val + successor.get_reward()
         if val > value:
             value, policy = val, move
