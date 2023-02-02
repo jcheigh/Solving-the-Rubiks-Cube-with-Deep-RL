@@ -3,6 +3,15 @@ from tensorflow import keras
 from keras import layers
 
 def make_model():
+    """
+    Creates keras.Model fully connected feed forward neural network. This value/policy network
+    takes as input a tensor of shape (1,480) and outputs a value and a policy (array of len 12)
+
+    Returns
+    -------
+    keras.Model
+    Value/Policy Network
+    """
     input = keras.Input(shape= (480,))
 
     dense1 = layers.Dense(4096, activation ="elu")(input)
@@ -19,6 +28,15 @@ def make_model():
     return model
 
 def compile_model(model):
+    """
+    Compiles model. Uses RMS prop and our loss functions are MSE for the value
+    and categorical crossentropy for the policy
+
+    Returns
+    -------
+    None
+    Compiles Model
+    """
     lr_schedule = keras.optimizers.schedules.ExponentialDecay(
         initial_learning_rate = 0.001,
         decay_steps = 1000,
@@ -26,7 +44,7 @@ def compile_model(model):
     )
     opt = keras.optimizers.RMSprop(learning_rate = lr_schedule)
     model.compile(loss = {'val' : 'mean_squared_error',
-                          'policy': 'sparse_categorical_crossentropy'},
+                          'policy': 'categorical_crossentropy'},
                   optimizer = opt)
     
     model.summary()

@@ -7,9 +7,9 @@ class Cube:
     Rubik's Cube class that holds the Cube as a 4-tuple (explained below). 
     Supports basic moves and the group operation of the Rubik's Cube (combining 2 configurations)
 
-    cube = Cube((cp, ep, co, eo))
+    cube = Cube((cp, ep, co, eo)) or cube = Cube() #defaults to solved Cube
 
-    See (INSERT WRITEUP) for more information. Essentially, the state of the Cube is fully determined 
+    See writeup attached to README for more information. Essentially, the state of the Cube is fully determined 
     by the orientation and permutation of the corners/edges. We arbitrarily assign 1-8 & 1-12 for the 
     spatial positions of corners and edges. 
 
@@ -36,17 +36,15 @@ class Cube:
     There are 3 representations we use in this class:
         1) self.rep is the 4-tuple specified above
         2) self.state is the 4-tuple with the orientation of the last corner/edge specified 
-        3) self.nn_input is a 20x24 one-hot matrix that we use as input for our neural network
+        3) self.nn_input is a (1,480) one-hot tensor that we use as input for our neural network
     """
-    #self.state of solved Cube
-    #solved_cube = np.concatenate((np.eye(8,20), np.eye(12,20)))
-    
     #faces of the Cube according to Singmaster notation
     faces = ["R", "L", "U", "D", "F", "B"] 
 
     #we specify a CW turn of the R face by (R,1), and CCW with (R,-1)
     moves = [(f,d) for f in faces for d in [-1,1]] 
 
+    #self.rep for the solved Rubik's Cube
     solved_rep = (np.arange(1,9), np.arange(1,13), np.zeros(7), np.zeros(11))
 
     def __init__(self, rep = solved_rep):
@@ -121,6 +119,7 @@ class Cube:
         #flatten/expand dims
         result = np.expand_dims(result.flatten(), 0)
 
+        #convert to tensor and return
         return tf.convert_to_tensor(result, dtype = tf.float32)
 
     def is_valid(self):
@@ -137,6 +136,14 @@ class Cube:
         return sgn(corner_perm) == sgn(edge_perm)
 
     def get_reward(self):
+        """
+        Gets reward associated with state of the Cube. 
+
+        Returns
+        -------
+        int
+        1 iff Cube is solved else -1
+        """
         return 1 if self.is_solved() else -1
 
     def get_successors(self):
@@ -147,12 +154,7 @@ class Cube:
         List containing Cubes obtained by performing each of the 12 basic moves
         """
         return [self.move(face, dir, in_place = False) for face, dir in self.moves]
-        successors = []
-        for face, dir in self.moves:
-            successor = self.move(face, dir, in_place = False)
-            successors.append(((face, dir), successor))
-        return successors 
-    
+
     def get_state(self):
         """
         Returns
@@ -166,7 +168,7 @@ class Cube:
         """
         Returns
         -------
-        np.array with np.shape == (20,24)
+        tf.tensor with shape (1,480)
         Getter for self.nn_input
         """
         return self.nn_input 
@@ -202,9 +204,9 @@ class Cube:
         Let self.state := (a1,a2,a3,a4), cube.state := (b1,b2,b3,b4), self * cube := (c1,c2,c3,c4), then
             c1 = b1 composed a1, 
             c2 = b2 composed a2
-            c3 = (a3 composed inverse(a1) + b3) mod 3
-            c4 = (a4 composed inverse(a2) + b4) mod 2 
-        See (INSERT WRITEUP) for more details. 
+            c3 = (a3 composed inverse(b1) + b3) mod 3
+            c4 = (a4 composed inverse(b2) + b4) mod 2
+        See writeup for more details. 
         """
         #get a_i's, b_i's
         a1, a2, a3, a4 = self.state 
@@ -215,13 +217,13 @@ class Cube:
         c1 = b1[a1] + 1 
         c2 = b2[a2] + 1
 
-        #quick way to perform inverse of permutation
-        inv_a1 = np.argsort(a1)
-        inv_a2 = np.argsort(a2)
+        #nverse of permutation
+        inv_b1 = np.argsort(b1)
+        inv_b2 = np.argsort(b2)
 
         #get c3, c4 by formulas above
-        c3 = (a3[inv_a1] + b3) % 3
-        c4 = (a4[inv_a2] + b4) % 2
+        c3 = (a3[inv_b1] + b3) % 3
+        c4 = (a4[inv_b2] + b4) % 2
 
         #if in place or not
         if in_place:
@@ -273,21 +275,80 @@ class Cube:
         """
         return self.__eq__(Cube())
 
-if __name__ == "__main__":
-    #testing Cube class
+def test():
+    # basic tests
     cube = Cube()
-    assert cube.is_solved() and cube.valid 
+    assert cube.is_solved() and cube.valid
 
-    #should solve the CUbe
+    for face, _ in cube.moves:
+        # (face, -1) & (face, 1) are inverses
+        cube.move(face, 1)
+        cube.move(face, -1)
+        assert cube.is_solved()
+
+        # 4x any move solves 
+        for i in range(4):
+            cube.move(face, 1)
+        assert cube.is_solved()
+
+        for i in range(4):
+            cube.move(face, -1)
+        assert cube.is_solved()
+
+    # Sune 6x should solve Cube
     for i in range(6):
         cube.move("R",1)
         cube.move("U",1)
         cube.move("R",-1)
         cube.move("U",-1)
-    
     assert cube.is_solved()
 
-    #basic moves are the successors of solved Cube
+    # Superflip 
+    cube.move("R", -1)
+    cube.move("U", 1)
+    cube.move("U", 1)
+    cube.move("B", 1)
+    cube.move("L", -1)
+    cube.move("F", 1)
+    cube.move("U", -1)
+    cube.move("B",1)
+    cube.move("D", 1)
+    cube.move("F", 1)
+    cube.move("U",1)
+    cube.move("D",-1)
+    cube.move("L",1)
+    cube.move("D", 1)
+    cube.move("D", 1)
+    cube.move("F",-1)
+    cube.move("R",1)
+    cube.move("B",-1)
+    cube.move("D",1)
+    cube.move("F",-1)
+    cube.move("U",-1)
+    cube.move("B",-1)
+    cube.move("U",1)
+    cube.move("D",-1)
+
+    superflip_state = cube.state
+    
+    # Superflip is solved state with all misoriented eges
+    assert all(superflip_state[0] == np.arange(1,9))
+    assert all(superflip_state[1] == np.arange(1,13))
+    assert all(superflip_state[2] == np.zeros(8))
+    assert all(superflip_state[3] == np.ones(12))
+
+    cube = Cube() 
+    # R, U2, D', B, D' is an element with order 1260 
+    for i in range(1260):
+        cube.move("R",1)
+        cube.move("U",1)
+        cube.move("U",1)
+        cube.move("D",-1)
+        cube.move("B",1)
+        cube.move("D",-1)    
+    assert cube.is_solved()
+
+    # basic moves are the successors of solved Cube
     basic_moves = [Cube(get_basic_cube(face, dir)) for (face, dir) in cube.moves]
     assert basic_moves == cube.get_successors()
 
@@ -296,8 +357,14 @@ if __name__ == "__main__":
     #all valid
     assert np.all([c.valid for c in cube.get_successors()])
     
-    #one hot encoded
+    #assert one hot encoded 
     assert np.sum(cube.nn_input) == 20
-    assert np.sum(cube.state[2]) % 3 == 0
+
+if __name__ == "__main__":
+    test()
+
+ 
+
+ 
 
 

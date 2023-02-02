@@ -8,14 +8,15 @@ import os
 import pickle 
 
 def adi():
-    model, path = get_model()
-    for itr in tqdm(range(5)):
-        cubes = get_scrambled_cubes(30, 30) #called X in paper
+    model, path = get_model() 
+    for itr in tqdm(range(50)):
+        cubes = get_scrambled_cubes(30, 30)
+
         X = get_training_data(cubes)  
-        Y = [get_nn_output(cube, model) for cube in cubes]
-        values = np.array([val for val, pol in Y])
-        policies = np.array([pol for val, pol in Y])
+        values, policies = get_values_and_policies(cubes, model) #Y in paper
+
         weights = get_sample_weights()
+
         model.fit(X, {"val" : values, "policy" : policies},
                   epochs = 15, sample_weight = weights,
                   verbose = 0)

@@ -22,24 +22,40 @@ def get_scrambled_cubes(batch_size, k):
         cubes.append(cube)
     return cubes
 
+def one_hot(i):
+    result = np.zeros(12)
+    result[i] = 1
+    return result.reshape(1, -1)
+
 def get_nn_output(cube, model):
     successors = cube.get_successors()
     value, policy = -np.inf, ''
     for move, successor in enumerate(successors):
         nn_input = successor.get_nn_input()
-        succ_val, succ_policy = model.predict(nn_input, verbose = 0)
+        succ_val, _ = model.predict(nn_input, verbose = 0)
         val = succ_val + successor.get_reward()
         if val > value:
-            value, policy = val, move
-    return value, policy
+            value, policy = val, move 
+    return value, one_hot(policy)
 
-def get_training_data(cubes):
-    X = np.empty((30, 480))
+def get_values_and_policies(cubes, model):
+    values, policies = [], []
+    for cube in cubes:
+        val, pol = get_nn_output(cube, model)
+        values.append(val)
+        policies.append(pol)
+    values = np.array(values).reshape(30, -1)
+    policies = np.array(policies).reshape(30,-1)
+    return values, policies 
+
+def get_training_data(cubes, n = 30):
+    X = np.empty((n, 480))
     for i, cube in enumerate(cubes):
         X[i] = np.array(cube.get_nn_input())
     return X 
 
 def get_sample_weights():
-    return np.array([1/(i+1) for i in range(30)])#np.array([1/(i+1) for i in range(30)] for j in range(1000)).flatten()
+    return np.array([1/(i+1) for i in range(30)])
+    #np.array([1/(i+1) for i in range(30)] for j in range(1000)).flatten()
 
 
