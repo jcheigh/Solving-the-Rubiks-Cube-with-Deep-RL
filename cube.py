@@ -1,6 +1,6 @@
 import numpy as np
 import random 
-from utils.cube_util import get_basic_cube, sgn
+from cube_util import get_basic_cube, sgn
 import tensorflow as tf
 class Cube:
     """
@@ -63,6 +63,10 @@ class Cube:
         #bool specifying if state is solvable
         self.valid = self.is_valid() 
     
+    def copy(self):
+        rep = self.rep
+        return Cube(rep)
+
     def to_state(self):
         """
         Converts from tuple representation to full tuple representation using Fundamental Thm of Cubology.

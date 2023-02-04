@@ -1,6 +1,7 @@
 import tensorflow as tf
 from tensorflow import keras 
 from keras import layers
+import numpy as np
 
 def make_model():
     """
@@ -25,6 +26,7 @@ def make_model():
                           name = "policy")(policy_layer)
 
     model = keras.Model(inputs = input, outputs = [value, policy])
+
     return model
 
 def compile_model(model):
@@ -48,3 +50,18 @@ def compile_model(model):
                   optimizer = opt)
     
     model.summary()
+ 
+def test():
+    model = make_model()
+    compile_model(model)
+    nn_input = np.random.randn(1,480)
+    val, policy = model.predict(nn_input)
+    print(f"Value: {val}")
+    print(f"Policy: {policy}")
+
+    assert val.shape == (1,1)
+    assert policy.shape == (1,12)
+    assert np.round(np.sum(policy[0])) == 1
+
+if __name__ == "__main__":
+    test()
