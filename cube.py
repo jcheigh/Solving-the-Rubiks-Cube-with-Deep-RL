@@ -149,6 +149,11 @@ class Cube:
         1 iff Cube is solved else -1
         """
         return 1 if self.is_solved() else -1
+    
+    def get_moves(self):
+        if self.is_solved():
+            return None 
+        return self.moves
 
     def get_successors(self):
         """

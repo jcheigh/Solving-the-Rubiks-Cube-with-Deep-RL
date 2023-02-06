@@ -9,7 +9,7 @@ import pickle
 
 def adi():
     model, path = get_model() 
-    for itr in tqdm(range(50)):
+    for itr in tqdm(range(200)):
         cubes = get_scrambled_cubes(30, 30)
 
         X = get_training_data(cubes)  
