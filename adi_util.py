@@ -5,7 +5,7 @@ from tensorflow import keras
 from cube import Cube
 
 def get_model():
-    path = "/Users/jcheigh/Solving-the-Rubik-s-Cube-with-Deep-RL/saved_models"
+    path = "/Users/jcheigh/saved_models"
     model = None
     if os.path.exists(path):
         model = keras.models.load_model(path)
