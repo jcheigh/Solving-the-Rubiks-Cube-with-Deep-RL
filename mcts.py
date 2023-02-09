@@ -1,58 +1,39 @@
 from cube import Cube
+from node import Node
 import numpy as np
 from cube_util import get_cube_moves
 from adi_util import get_model
-class Node:
-    
-    #virtual loss hyperparameter
-    virtual_loss = 150 
-
-    def __init__(self, state, policy):
-        #state is Cube(), policy is output of nn = np.array with .shape = (1,12)
-
-        self.state = state 
-        #N_s(a) = number of times took action a at state self.state
-        self.num_took_action = np.zeros(12) 
-        #W_s(a) = max value of action a at state self.state
-        self.max_value_of_action = np.zeros(12)
-        #L_s(a) = virtual loss for action a at state self.state 
-        self.vir_loss_of_action = np.zeros(12)
-        #P_s(a) = prior prob distribution of actions given self.state
-        self.prob_of_action = policy 
-
-    def get_state(self):
-        return self.state 
-    
-    def get_memory(self):
-        # (N_s(a), W_s(a), L_s(a), P_s(a))
-        return (
-               self.num_took_action,
-               self.max_value_of_action,
-               self.vir_loss_of_action,
-               self.prob_of_action 
-        )   
-    
 class MCTS():
     model, _ = get_model()
 
-    def __init__(self, root):
+    def __init__(self, cube):
+        #cube
+        self.cube = cube 
         #root node
-        self.root = root
+        self.root = self.get_root_node()
+        #current node (maybe change up later)  
+        self.current = self.root 
 
-        #current state 
-        self.current = root
+    def get_root_node(self):
+        cube = self.cube 
+        _, policy = self.model.predict(cube.get_nn_input())
+        return Node(cube, policy)
 
-        #visited states 
-        self.visited = {root}
+    def choose_action(self):
+        #choose action using formula in paper 
+        #return an action in cube.moves
+        return None 
 
-    
-    def search(self):
+    def traverse(self):
+        root = self.get_root_node()
+
+    def search(self, num_trials):
+        for trial in range(num_trials):
+            leaf = self.traverse()
+            #not correct below but general idea
+            self.expand(leaf)
+            self.backpropagate(leaf)
         return None
-        #do MCTS search
-
-    def select(self):
-        return None
-        #perform selection
 
     def expand(self):
         return None
