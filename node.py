@@ -1,13 +1,10 @@
 from cube import Cube
 import numpy as np
-from cube_util import get_cube_moves
 from adi_util import get_model
 
 class Node:
     #virtual loss hyperparameter
     virtual_loss = 150 
-    #model
-    model, _ = get_model()
 
     def __init__(self, state, policy):
         #state is Cube(), policy is output of nn = np.array with .shape = (1,12)
@@ -23,19 +20,27 @@ class Node:
         self.prob_of_action = policy 
         #Memory is tuple (N,W,L,P)
         self.memory = self.get_memory()
-        #parent Node 
-        self.parent = None
         #children Nodes
-        self.children = set()
+        self.children = []
+
+    def update_vir_loss(self, index):
+        self.vir_loss_of_action[index] +=  self.virtual_loss
+
+    def has_children(self):
+        return self.children != []
+
+    def is_solved_cube(self):
+        return self.state.is_solved()
 
     def is_leaf(self):
         return self.children == set()
         
-    def set_num_took_action(self, x):
-        self.num_took_action = x 
+    def update_num_took_action(self, index):
+        self.num_took_action[index] += 1
     
-    def set_max_value_of_action(self, x):
-        self.max_value_of_action = x
+    def update_max_value_of_action(self, index, value):
+        if value > self.max_value_of_action[index]:
+            self.max_value_of_action[index] = value 
 
     def set_vir_loss_of_action(self, x):
         self.vir_loss_of_action = x 
@@ -55,20 +60,17 @@ class Node:
                self.prob_of_action 
         )   
 
-    def set_parent(self, parent):
-        self.parent = parent 
+    def predict(self, cube, model):
+        nn_input = cube.get_nn_input()
+        return model.predict(nn_input)  
 
-    def get_parent(self):
-        return self.parent 
-
-    def add_children(self):
+    def add_children(self, model):
         cube = self.state 
         for successor in cube.get_successors():
-            nn_input = successor.get_nn_input()
-            _, policy = self.model.predict(nn_input)
+            _, policy = self.predict(successor, model)
             child_node = Node(successor, policy)
-            child_node.set_parent(self)
-            self.children.add(child_node)
+            self.children.append(child_node)
+        return self.predict(cube, model)
 
     def get_children(self):
         return self.children

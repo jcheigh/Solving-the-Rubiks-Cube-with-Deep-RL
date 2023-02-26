@@ -284,6 +284,9 @@ class Cube:
         """
         return self.__eq__(Cube())
 
+    def __str__(self):
+        return str(self.state)
+
 def test():
     # basic tests
     cube = Cube()

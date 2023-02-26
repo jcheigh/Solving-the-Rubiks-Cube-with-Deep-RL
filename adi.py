@@ -35,4 +35,4 @@ def test():
     print(np.argsort(values))
 
 if __name__ == "__main__":
-    test()
+    adi()
